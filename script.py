@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import subprocess
+import json
 import os
 
 # Load variables from .env file
@@ -17,4 +18,15 @@ def login_vast():
     key = os.getenv('VAST_KEY')
     return run_shell_cmd(f'vastai set api-key {key}')
 
-print(login_vast())
+def get_all_machines():
+    verified_demand_machines = json.loads(run_shell_cmd(f'vastai search offers verified=true -d --raw'))
+    unverified_demand_machines = json.loads(run_shell_cmd(f'vastai search offers verified=false -d --raw'))
+    demand_machines = {**verified_demand_machines, **unverified_demand_machines}
+
+    verified_bid_machines = json.loads(run_shell_cmd(f'vastai search offers verified=true -b --raw'))
+    unverified_bid_machines = json.loads(run_shell_cmd(f'vastai search offers verified=false -b --raw'))
+    bid_machines = {**verified_bid_machines, **unverified_bid_machines}
+
+    all_machines = {**demand_machines, **bid_machines}
+
+    return all_machines
